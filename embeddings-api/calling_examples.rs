@@ -30,8 +30,9 @@ fn print_json_config(file_path: &str) {
             let config: serde_json::Value = serde_json::from_str(&contents).unwrap(); 
             println!("{}", serde_json::to_string_pretty(&config).unwrap()); 
 
-            let _ = file_embedding::get_file_embedding_from_name("name");
-            let _ = prompt_embedding::get_prompt_embedding("prompt"); 
+            let _ = file_embedding::create_embedding_file_name("name");
+            let _ = file_embedding::create_embedding_file_content("content")
+            let _ = prompt_embedding::create_embedding_prompt("prompt"); 
         }, 
         Err(_) => println!("File not found or path is incorrect."), 
     }
