@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-
+import styles from '../styles/searchbox.module.css';
 
 interface SearchBoxProps {
     onSearchChange: (value: string) => void;
@@ -16,6 +16,7 @@ function SearchBox({ onSearchChange }: SearchBoxProps ) {
       type="text"
       placeholder="Search by what the file is about"
       onChange={handleChange}
+      className={styles.searchBox}
     />
   );
 }

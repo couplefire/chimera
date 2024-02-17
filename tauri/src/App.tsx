@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import SearchBox from "./components/searchbox";
 import ResultBox from "./components/resultbox";
-import { SearchResult, SearchResponse } from "./types/types";
+import { SearchResult } from "./types/types";
 import "./App.css";
 
 function App() {
@@ -19,8 +19,9 @@ function App() {
 
     timerRef.current = window.setTimeout(async () => {
       const res = await invoke("search", { searchText });
+      console.log(res);
       if (res) {
-        const { searchResults } = res as SearchResponse;
+        const searchResults = res as SearchResult[];
         setSearchResults(searchResults);
       }
     }, 100);
