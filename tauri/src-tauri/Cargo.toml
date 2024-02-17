@@ -14,12 +14,14 @@ tauri-build = { version = "1.5", features = [] }
 tauri = { version = "1.5", features = ["shell-open"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-<<<<<<< HEAD
 vectordb = "0.4.10"
-=======
 walkdir = "2.4.0"
 anyhow = "1.0.79"
->>>>>>> 8aeb6876f6282d97548927f301af44785e53a262
+pdf-extract = "0.7.4"
+tokio = "1.36.0"
+futures = "0.3.30"
+arrow-schema = "50.0.0"
+arrow-array = "50.0.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

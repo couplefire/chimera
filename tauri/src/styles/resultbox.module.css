@@ -1,0 +1,28 @@
+
+.logo{
+    width: 40px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.container{
+    height: 40px;
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.textContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.filename{
+    font-size: 1.5em;
+    margin: 0 0;
+}
+
+.directory{
+    font-size: 1em;
+    margin: 0 0;
+}
