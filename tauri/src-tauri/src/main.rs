@@ -8,6 +8,7 @@ use db::{DbConnection, init_db};
 use indexer::start_indexing;
 
 mod indexer;
+<<<<<<< HEAD
 mod db;
 
 #[derive(Serialize)]
@@ -15,6 +16,9 @@ struct SearchResult {
     filename: String,
     directory: String,
 }
+=======
+mod similarity_search;
+>>>>>>> b165ee7 (css)
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -58,4 +62,5 @@ fn main() {
         .invoke_handler(tauri::generate_handler![search])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+
 }
