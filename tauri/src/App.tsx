@@ -6,7 +6,7 @@ import { SearchResult } from "./types/types";
 import "./App.css";
 
 function App() {
-  const [searchText, setSearchText] = useState<string>('');
+  const [searchText, setSearchText] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const timerRef = useRef<number | null>(null);
 
@@ -15,7 +15,6 @@ function App() {
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
     }
-
 
     timerRef.current = window.setTimeout(async () => {
       const res = await invoke("search", { searchText });
