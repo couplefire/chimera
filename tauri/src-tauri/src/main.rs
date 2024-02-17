@@ -45,21 +45,24 @@ async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Res
 fn main() {
     tauri::Builder::default()
         .setup(|app| { 
-            // we perform the initialization code on a new task so the app doesn't freeze 
+            let initialize_db = false;
+
             let handle = tauri::async_runtime::spawn(async move { 
-                let db = init_db().await;
+                let db = init_db(initialize_db).await;
                 db
             });
             let db = tauri::async_runtime::block_on(handle).unwrap();
             app.manage(db.clone());
 
-            tauri::async_runtime::spawn(async move {
-                println!("Starting indexing process...");
-                match start_indexing(db).await {
-                    Ok(_) => println!("Indexing process finished successfully!"),
-                    Err(e) => println!("Error while indexing: {}", e),
-                }
-            });
+            if initialize_db {
+                tauri::async_runtime::spawn(async move {
+                    println!("Starting indexing process...");
+                    match start_indexing(db).await {
+                        Ok(_) => println!("Indexing process finished successfully!"),
+                        Err(e) => println!("Error while indexing: {}", e),
+                    }
+                });
+            }
 
             Ok(()) 
         }) 

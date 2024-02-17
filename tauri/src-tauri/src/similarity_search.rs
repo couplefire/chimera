@@ -20,13 +20,22 @@ pub async fn search(db: DbConnection, prompt: Vec<f32>) -> Result<()> {
 }
 
 async fn cosine_similarity_search(db: DbConnection, prompt: &[f32]) -> Result<Vec<RecordBatch>> {
-    let _embeddings = db.db.open_table_with_params("files", Default::default())
+    let embeddings = db.db.open_table_with_params("files", Default::default())
         .await
         .unwrap();
 
-    let stream = _embeddings.query().nearest_to(prompt)
-        .refine_factor(5)
-        .nprobes(10)
+    println!("{}", embeddings.count_rows(None).await.unwrap());
+
+    // embeddings.create_index(&["vector"])
+    //     .ivf_pq()
+    //     .num_partitions(1)
+    //     .build()
+    //     .await
+    //     .unwrap();
+
+    let stream = embeddings.query().use_index(false).nearest_to(prompt)
+        // .refine_factor(5)
+        // .nprobes(10)
         .execute_stream()
         .await
         .unwrap();

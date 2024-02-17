@@ -47,7 +47,7 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                 )
                 .unwrap()].into_iter().map(Ok),
                 db.schema.clone(),
-            )), None);
+            )), None).await.expect("Failed to add to vector db");
 
             println!("Indexed file {:?}", path);
         }

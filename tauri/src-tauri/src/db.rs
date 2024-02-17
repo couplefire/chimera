@@ -13,7 +13,7 @@ pub struct DbConnection {
     pub schema: Arc<Schema>,
 }
 
-pub async fn init_db() -> DbConnection {
+pub async fn init_db(initialize_db: bool) -> DbConnection {
     let db = connect("../../lancedb-data/sample-lancedb").await.expect("Failed to start lancedb");
 
     let schema = Arc::new(Schema::new(vec![
@@ -33,8 +33,10 @@ pub async fn init_db() -> DbConnection {
         schema.clone(),
     );
 
-    let _ = db.drop_table("files").await;
-    db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
+    if initialize_db {
+        let _ = db.drop_table("files").await;
+        db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
+    }
 
     DbConnection {
         db,
