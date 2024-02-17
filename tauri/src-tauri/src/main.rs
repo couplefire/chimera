@@ -8,22 +8,21 @@ use db::{DbConnection, init_db};
 use indexer::start_indexing;
 
 mod indexer;
-<<<<<<< HEAD
 mod db;
+mod similarity_search;
 
 #[derive(Serialize)]
 struct SearchResult {
     filename: String,
     directory: String,
 }
-=======
-mod similarity_search;
->>>>>>> b165ee7 (css)
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
     println!("{:?}", state.table_names().await.unwrap());
+
+    similarity_search::search(state.inner().clone(), vec![1.0, 2.0, 3.0]).await.unwrap();
 
     let result = vec![
         SearchResult {

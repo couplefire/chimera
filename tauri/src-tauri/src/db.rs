@@ -15,15 +15,7 @@ pub async fn init_db() -> DbConnection {
     let schema = Arc::new(Schema::new(vec![
         Field::new("file_name", DataType::Utf8, false),
         Field::new(
-            "file_name_embedding",
-            DataType::FixedSizeList(
-                Arc::new(Field::new("item", DataType::Float32, true)),
-                EMBEDDING_DIM,
-            ),
-            true,
-        ),
-        Field::new(
-            "content_embedding",
+            "vector",
             DataType::FixedSizeList(
                 Arc::new(Field::new("item", DataType::Float32, true)),
                 EMBEDDING_DIM,
@@ -37,18 +29,8 @@ pub async fn init_db() -> DbConnection {
         schema.clone(),
     );
 
-    match db
-        .create_table("files", Box::new(batches), None)
-        .await {
-        Ok(_) => {}
-        Err(vectordb::Error::TableAlreadyExists { name: _ }) => {
-            let _ = db
-                .open_table_with_params("files", Default::default())
-                .await
-                .unwrap();
-        }
-        Err(e) => panic!("Error while creating table: {}", e)
-    }
+    let _ = db.drop_table("files").await;
+    db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
 
     db
 }
