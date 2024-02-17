@@ -1,17 +1,8 @@
 use openai_api_rs::v1::api::Client; 
 use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL; 
 use openai_api_rs::v1::embedding::EmbeddingRequest; 
+use crate::parser::ParsedFile; 
 use std::env; 
-
-// "OPENAI_API_KEY" = "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"
-
-
-// pub struct ParsedFile {
-//     name: String, 
-//     extension: String, 
-//     path: String, 
-//     content: Option<String>
-// }
 
 fn create_embedding_file(parsed_file: ParsedFile) -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
