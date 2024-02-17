@@ -3,31 +3,58 @@ use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL;
 use openai_api_rs::v1::embedding::EmbeddingRequest; 
 use std::env; 
 
-"OPENAI_API_KEY" = "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"
+// "OPENAI_API_KEY" = "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"
 
-fn create_embedding_file_name(file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+
+// pub struct ParsedFile {
+//     name: String, 
+//     extension: String, 
+//     path: String, 
+//     content: Option<String>
+// }
+
+fn create_embedding_file(parsed_file: ParsedFile) -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
 
-    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), file_name.to_string()); 
-    req.dimensions = Some(10); 
+    let mut req1 = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), parsed_file.name.to_string()); 
+    req1.dimensions = Some(10); 
 
-    let result = client.embedding(req)?; 
-    println!("{:?}", result.data); 
+    let mut req2 = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), parsed_file.content.to_string()); 
+    req2.dimensions = Some(10);
+
+    let result1 = client.embedding(req1)?; 
+    println!("{:?}", result1.data); 
+
+    let result2 = client.embedding(req2)?; 
+    println!("{:?}", result2.data); 
 
     Ok(())
 }
 
-fn create_embedding_file_content(file_content: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
 
-    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), file_content.to_string()); 
-    req.dimensions = Some(10); 
+// fn create_embedding_file_name(file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+//     let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
 
-    let result = client.embedding(req)?; 
-    println!("{:?}", result.data); 
+//     let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), file_name.to_string()); 
+//     req.dimensions = Some(10); 
 
-    Ok(())
-}
+//     let result = client.embedding(req)?; 
+//     println!("{:?}", result.data); 
+
+//     Ok(())
+// }
+
+// fn create_embedding_file_content(file_content: &str) -> Result<(), Box<dyn std::error::Error>> {
+//     let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
+
+//     let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), file_content.to_string()); 
+//     req.dimensions = Some(10); 
+
+//     let result = client.embedding(req)?; 
+//     println!("{:?}", result.data); 
+
+//     Ok(())
+// }
 
 
 

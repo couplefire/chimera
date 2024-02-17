@@ -3,7 +3,7 @@ use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL;
 use openai_api_rs::v1::embedding::EmbeddingRequest; 
 use std::env; 
 
-"OPENAI_API_KEY" = "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"
+// "OPENAI_API_KEY" = "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"
 
 fn create_embedding_prompt(prompt: &str) -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
