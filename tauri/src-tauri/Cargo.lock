@@ -4664,8 +4664,8 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
- "walkdir",
  "vectordb",
+ "walkdir",
 ]
 
 [[package]]
