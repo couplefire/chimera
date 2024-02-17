@@ -1,9 +1,9 @@
 use std::io::Read;
 pub struct ParsedFile {
-    name: String, 
-    extension: String, 
-    path: String, 
-    content: Option<String>
+    pub name: String, 
+    pub extension: String, 
+    pub path: String, 
+    pub content: Option<String>
 }
 
 impl std::fmt::Debug for ParsedFile {

@@ -10,6 +10,10 @@ use indexer::start_indexing;
 mod indexer;
 mod db;
 mod similarity_search;
+mod embeddings;
+mod parser;
+
+pub const EMBEDDING_DIM: i32 = 128;
 
 #[derive(Serialize)]
 struct SearchResult {
@@ -20,7 +24,7 @@ struct SearchResult {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
-    println!("{:?}", state.table_names().await.unwrap());
+    println!("{:?}", state.db.table_names().await.unwrap());
 
     similarity_search::search(state.inner().clone(), vec![1.0, 2.0, 3.0]).await.unwrap();
 
@@ -39,14 +43,6 @@ async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Res
 }
 
 fn main() {
-    std::thread::spawn(|| {
-        println!("Starting indexing process...");
-        match start_indexing() {
-            Ok(_) => println!("Indexing process finished successfully!"),
-            Err(e) => println!("Error while indexing: {}", e),
-        }
-    });
-
     tauri::Builder::default()
         .setup(|app| { 
             // we perform the initialization code on a new task so the app doesn't freeze 
@@ -55,11 +51,19 @@ fn main() {
                 db
             });
             let db = tauri::async_runtime::block_on(handle).unwrap();
-            app.manage(db);
+            app.manage(db.clone());
+
+            tauri::async_runtime::spawn(async move {
+                println!("Starting indexing process...");
+                match start_indexing(db).await {
+                    Ok(_) => println!("Indexing process finished successfully!"),
+                    Err(e) => println!("Error while indexing: {}", e),
+                }
+            });
+
             Ok(()) 
         }) 
         .invoke_handler(tauri::generate_handler![search])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
 }

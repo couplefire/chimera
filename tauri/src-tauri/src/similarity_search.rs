@@ -20,7 +20,7 @@ pub async fn search(db: DbConnection, prompt: Vec<f32>) -> Result<()> {
 }
 
 async fn cosine_similarity_search(db: DbConnection, prompt: &[f32]) -> Result<Vec<RecordBatch>> {
-    let _embeddings = db.open_table_with_params("files", Default::default())
+    let _embeddings = db.db.open_table_with_params("files", Default::default())
         .await
         .unwrap();
 

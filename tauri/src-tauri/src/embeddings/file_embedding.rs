@@ -1,25 +1,22 @@
 use openai_api_rs::v1::api::Client; 
 use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL; 
 use openai_api_rs::v1::embedding::EmbeddingRequest; 
-use crate::parser::ParsedFile; 
-use std::env; 
+use anyhow::Result;
 
-fn create_embedding_file(parsed_file: ParsedFile) -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new(env::var("OPENAI_API_KEY").unwrap().to_string()); 
+use crate::parser::ParsedFile;
+use crate::EMBEDDING_DIM; 
 
-    let mut req1 = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), parsed_file.name.to_string()); 
-    req1.dimensions = Some(10); 
+pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
+    let client = Client::new("api_key".to_string()); 
 
-    let mut req2 = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), parsed_file.content.to_string()); 
-    req2.dimensions = Some(10);
+    let mut combined_str = parsed_file.name;
+    combined_str.push_str("\n");
+    combined_str.push_str(&parsed_file.content.unwrap());
+    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), combined_str); 
+    req.dimensions = Some(EMBEDDING_DIM);
 
-    let result1 = client.embedding(req1)?; 
-    println!("{:?}", result1.data); 
-
-    let result2 = client.embedding(req2)?; 
-    println!("{:?}", result2.data); 
-
-    Ok(())
+    let result = client.embedding(req)?; 
+    Ok(result.data[0].embedding.clone())
 }
 
 

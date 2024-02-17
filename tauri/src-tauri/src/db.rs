@@ -5,9 +5,13 @@ use vectordb::{connect, Connection};
 use arrow_schema::{DataType, Schema, Field};
 use arrow_array::RecordBatchIterator;
 
-pub type DbConnection = Arc<dyn Connection>;
+use crate::EMBEDDING_DIM;
 
-const EMBEDDING_DIM: i32 = 128;
+#[derive(Clone)]
+pub struct DbConnection {
+    pub db: Arc<dyn Connection>,
+    pub schema: Arc<Schema>,
+}
 
 pub async fn init_db() -> DbConnection {
     let db = connect("../../lancedb-data/sample-lancedb").await.expect("Failed to start lancedb");
@@ -32,5 +36,8 @@ pub async fn init_db() -> DbConnection {
     let _ = db.drop_table("files").await;
     db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
 
-    db
+    DbConnection {
+        db,
+        schema,
+    }
 }
