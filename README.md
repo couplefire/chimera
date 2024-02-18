@@ -6,7 +6,7 @@ Examining our difficulties in our daily workflow, we realized that we often coul
 
 ## What it does
 
-Our semantic file searcher will first ask you to describe the file you are looking for. Then it will go through all the files in your directory and rank them according to which fit the prompt the best.
+Chimera will first ask you to describe the file you are looking for. Then it will go through all the files in your directory and rank them according to which fit the prompt the best.
 
 ## How we built it
 
@@ -24,6 +24,6 @@ The end product, being built with Rust, is highly performant. Our embeddings fra
 
 We learned how to work with Rust (especially the Tauri framework and Apache Arrow's data format that LanceDB uses) and how to use a vector DB.
 
-## What's next for Semantic File Searcher
+## What's next for Chimera
 
 While this hackathon used OpenAI's embeddings API, the end goal would be to ship a local embeddings model to the user's computer so their files won't have to leave their personal laptop. In addition, we hope to fine-tune the embeddings model to perform better at the specific task of searching for files.
