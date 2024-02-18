@@ -1,5 +1,5 @@
 use arrow_array::types::Float32Type;
-use arrow_array::{FixedSizeListArray, RecordBatch, RecordBatchIterator, StringArray};
+use arrow_array::{FixedSizeListArray, RecordBatch, RecordBatchIterator, StringArray, UInt64Array};
 use walkdir::WalkDir;
 use std::fs;
 use std::io::Read;
@@ -8,7 +8,7 @@ use anyhow::Result;
 
 use crate::db::DbConnection;
 use crate::{embeddings, EMBEDDING_DIM};
-use crate::parser::ParsedFile;
+use crate::parser::{ParsedFile, parse};
 
 pub async fn start_indexing(db: DbConnection) -> Result<()> {
     let tbl = db.db
@@ -24,15 +24,17 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
             let mut file = fs::File::open(path)?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
-
+            let parsed_file = parse(path.to_str().unwrap());
+            /*
             let parsed_file = ParsedFile {
                 name: path.file_name().unwrap().to_str().unwrap().to_string(),
                 content: Some(contents),
                 extension: path.extension().unwrap().to_str().unwrap().to_string(),
                 path: path.to_str().unwrap().to_string(),
-                file_size: 0,
-                num_pages: None
+                file_size: ,
+                num_pages: Some(num_pages),
             };
+            */
             let embed = embeddings::create_embedding_file(parsed_file.clone())?;
 
             tbl.add(Box::new(RecordBatchIterator::new(
@@ -46,6 +48,8 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                                 EMBEDDING_DIM,
                             ),
                         ),
+                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.file_size])),
+                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.num_pages.unwrap()]))
                     ],
                 )
                 .unwrap()].into_iter().map(Ok),

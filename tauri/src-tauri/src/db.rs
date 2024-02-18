@@ -27,8 +27,8 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
             ),
             true,
         ),
-        //Field::new("File Size", DataType::Int64, False),
-        //Field::new("Num Pages", DataType::Int64, False)
+        Field::new("File Size", DataType::Int32, false),
+        Field::new("Num Pages", DataType::Int32, false)
     ]));
     
     let batches = RecordBatchIterator::new(
