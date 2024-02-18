@@ -1,8 +1,9 @@
 
 .logo {
     width: 60px;
-    height: auto;
+    height: 60px;
     margin-right: 20px;
+    box-sizing: border-box;
 }
 
 .resultBox {

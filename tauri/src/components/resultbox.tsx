@@ -1,5 +1,7 @@
 import { SearchResult } from "../types/types";
 import { getLogoByExtension } from "../utils/logoutils";
+import { invoke } from "@tauri-apps/api";
+import { appWindow } from "@tauri-apps/api/window";
 import styles from "../styles/resultbox.module.css";
 
 interface ResultBoxProps {
@@ -11,8 +13,15 @@ function SearchBox({ result }: ResultBoxProps ) {
     const file_extension = result.directory.split('.').pop() ?? 'aosdfadi'; 
     const logo_path = getLogoByExtension(file_extension, result.directory);
 
+    const renderFileName = (fileName: string) => {
+        if (fileName.length > 30) {
+            return '...' + fileName.slice(-27);
+        }
+        return fileName;
+    }
+
     const renderDirectory = (directory: string) => {
-        const maxDisplayLength = 20;
+        const maxDisplayLength = 30;
         const parts = directory.split('/');
         let currentPath = parts.pop() || '';
         while (parts.length > 0 && currentPath.length + parts[parts.length-1].length + 1 <= maxDisplayLength) {
@@ -38,17 +47,22 @@ function SearchBox({ result }: ResultBoxProps ) {
         }
     }
 
+    const openFile = () => {
+        invoke('open', { path: result.directory });
+        appWindow.hide();
+    }
+
     return (
-        <div className={`${styles.resultBox}`}>
+        <div className={`${styles.resultBox}`} onClick={openFile}>
             <div className={styles.container}>
                 <img src={logo_path} className={styles.logo} />
                 <div className={styles.textContainer}>
                     <div className={styles.topLevel}>
-                        <div>{result.fileName}</div>
+                        <div>{renderFileName(result.fileName)}</div>
                     </div>
                     <div className={styles.bottomLevel}>
                         <div>{renderDirectory(result.directory)}</div>
-                        {result.numPages && 
+                        {result.numPages !== null && result.numPages > 0 &&
                             <div>{result.numPages} pages</div>
                         }
                         <div>{renderFileSize(result.fileSize)}</div>
