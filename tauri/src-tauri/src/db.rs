@@ -4,6 +4,7 @@ use std::{iter, sync::Arc};
 use vectordb::{connect, Connection};
 use arrow_schema::{DataType, Schema, Field};
 use arrow_array::RecordBatchIterator;
+use crate::indexer::start_indexing;
 
 use crate::EMBEDDING_DIM;
 
@@ -14,9 +15,9 @@ pub struct DbConnection {
 }
 
 pub async fn init_db(initialize_db: bool) -> DbConnection {
-    let db = connect("../../lancedb-data/sample-lancedb").await.expect("Failed to start lancedb");
+    let our_db = connect("../../lancedb-data/sample-lancedb").await.expect("Failed to start lancedb");
 
-    let schema = Arc::new(Schema::new(vec![
+    let our_schema = Arc::new(Schema::new(vec![
         Field::new("file_name", DataType::Utf8, false),
         Field::new(
             "vector",
@@ -26,20 +27,27 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
             ),
             true,
         ),
+        //Field::new("File Size", DataType::Int64, False),
+        //Field::new("Num Pages", DataType::Int64, False)
     ]));
     
     let batches = RecordBatchIterator::new(
         iter::empty(),
-        schema.clone(),
+        our_schema.clone(),
     );
 
     if initialize_db {
-        let _ = db.drop_table("files").await;
-        db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
-    }
+        let _ = our_db.drop_table("files").await;
+        let db_connect = DbConnection{
+            db: our_db.clone(),
+            schema: our_schema.clone(),
+        } ;
+        start_indexing(db_connect);
+        //let _ =  db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
+    };
 
     DbConnection {
-        db,
-        schema,
+        db: our_db.clone(),
+        schema: our_schema.clone(),
     }
 }

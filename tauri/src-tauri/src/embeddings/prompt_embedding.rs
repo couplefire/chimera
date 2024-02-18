@@ -8,7 +8,7 @@ use crate::EMBEDDING_DIM;
 // "OPENAI_API_KEY" = "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"
 
 pub fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
-    let client = Client::new("api_key".to_string()); 
+    let client = Client::new("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".to_string()); 
 
     let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), prompt.to_string()); 
     req.dimensions = Some(EMBEDDING_DIM); 

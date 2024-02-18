@@ -7,7 +7,7 @@ use crate::parser::ParsedFile;
 use crate::EMBEDDING_DIM; 
 
 pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
-    let client = Client::new("api_key".to_string()); 
+    let client = Client::new("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".to_string()); 
 
     let mut combined_str = parsed_file.name;
     combined_str.push_str("\n");
