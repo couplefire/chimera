@@ -5,26 +5,25 @@ use async_openai::Client;
 use crate::parser::ParsedFile;
 use crate::EMBEDDING_DIM; 
 
-pub async fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
+pub async fn create_embedding_files(parsed_files: Vec<ParsedFile>) -> Result<Vec<Vec<f32>>> {
     let client = Client::new(); // looks for OPENAI_API_KEY environment variable
 
-    let mut combined_str = parsed_file.name;
-    combined_str.push_str("\n");
-    combined_str.push_str(&parsed_file.content.unwrap());
+    let parsed_file_strings: Vec<String> = parsed_files.into_iter().map(|x| {
+        let mut combined_str = x.name;
+        combined_str.push_str("\n");
+        combined_str.push_str(&x.content.unwrap());
+        combined_str
+    }).collect();
 
     let result = client.embeddings().create(CreateEmbeddingRequest {
         model: "text-embedding-3-small".to_string(),
-        input: EmbeddingInput::StringArray(vec![combined_str]),
+        input: EmbeddingInput::StringArray(parsed_file_strings),
         dimensions: Some(EMBEDDING_DIM),
         ..Default::default()
     }).await?;
 
-    let mut mag = 0.0;
-    for i in 0..result.data[0].embedding.len() {
-        mag += result.data[0].embedding[i] * result.data[0].embedding[i];
-    }
-    println!("Magnitude of data {}", mag);
-    Ok(result.data[0].embedding.clone())
+    let result: Vec<Vec<f32>> = result.data.into_iter().map(|x| x.embedding).collect();
+    Ok(result)
 }
 
 
