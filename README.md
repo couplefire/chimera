@@ -1,4 +1,4 @@
-# semantic-files
+# Chimera
 
 ## Inspiration
 
