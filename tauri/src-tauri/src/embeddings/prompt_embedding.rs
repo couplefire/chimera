@@ -12,7 +12,10 @@ pub async fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
         ..Default::default()
     }).await?;
 
-    Ok(result.data[0].embedding.clone())
+    let mut embd = result.data[0].embedding.clone();
+    embd.extend(embd.clone());
+
+    Ok(embd)
 }
 
 // fn create_embedding_file_content(file_content: &str) -> Result<(), Box<dyn std::error::Error>> {

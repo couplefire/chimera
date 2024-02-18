@@ -1,4 +1,4 @@
-use arrow_array::{RecordBatch, StringArray};
+use arrow_array::{RecordBatch, StringArray, UInt64Array};
 use futures::TryStreamExt;
 use anyhow::Result;
 
@@ -7,21 +7,27 @@ use crate::{db::DbConnection, SearchResult, EMBEDDING_DIM};
 pub async fn search(db: DbConnection, prompt: Vec<f32>) -> Result<Vec<SearchResult>> {
     let dot_products_with_indices = cosine_similarity_search(db, &prompt).await?;
 
-    let mut file_names = Vec::new();
+    let mut metadata: Vec<SearchResult> = Vec::new();
     for batch in dot_products_with_indices {
-        file_names.append(&mut batch.column(0).as_any().downcast_ref::<StringArray>().unwrap().into_iter().map(|x| x.unwrap().to_string()).collect::<Vec<_>>());
+        let file_names = batch.column(0).as_any().downcast_ref::<StringArray>().unwrap().into_iter().map(|x| x.unwrap().to_string()).collect::<Vec<_>>();
+        let directories = batch.column(2).as_any().downcast_ref::<StringArray>().unwrap().into_iter().map(|x| x.unwrap().to_string()).collect::<Vec<_>>();
+        let file_sizes = batch.column(3).as_any().downcast_ref::<UInt64Array>().unwrap().into_iter().map(|x| x.unwrap()).collect::<Vec<_>>();
+        let num_pagess = batch.column(4).as_any().downcast_ref::<UInt64Array>().unwrap().into_iter().map(|x| x.unwrap()).collect::<Vec<_>>();
+        metadata.append(&mut file_names.iter().zip(directories.iter()).zip(file_sizes.iter()).zip(num_pagess.iter()).map(|(((file_name, directory), file_size), num_pages)| {
+            SearchResult {
+                fileName: file_name.to_string(),
+                directory: directory.to_string(),
+                fileSize: *file_size,
+                numPages: Some(*num_pages),
+            }
+        }).collect());
     }
 
-    Ok(file_names.into_iter().map(|filename| SearchResult { 
-        fileName: filename,
-        directory: "test".to_string(),
-        fileSize: 0,
-        numPages: None,
-     }).collect())
+    Ok(metadata)
 }
 
 async fn cosine_similarity_search(db: DbConnection, prompt: &[f32]) -> Result<Vec<RecordBatch>> {
-    if prompt.len() != EMBEDDING_DIM as usize {
+    if prompt.len() != 2 * EMBEDDING_DIM as usize {
         return Err(anyhow::anyhow!("Prompt must be 128-dimensional"));
     }
 

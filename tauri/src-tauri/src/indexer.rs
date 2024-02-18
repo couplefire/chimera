@@ -31,8 +31,9 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
 
     let file_embeddings = embeddings::create_embedding_files(parsed_files.clone()).await?;
     let parsed_file_names = parsed_files.iter().map(|x| x.name.clone());
-    let parsed_file_sizes = parsed_files.iter().map(|x| x.file_size as i32);
-    let parsed_file_num_pages = parsed_files.iter().map(|x| x.num_pages.unwrap_or_default() as i32);
+    let parsed_file_directories = parsed_files.iter().map(|x| x.path.clone());
+    let parsed_file_sizes = parsed_files.iter().map(|x| x.file_size as u64);
+    let parsed_file_num_pages = parsed_files.iter().map(|x| x.num_pages.unwrap_or_default() as u64);
 
     tbl.add(Box::new(RecordBatchIterator::new(
         vec![RecordBatch::try_new(
@@ -42,11 +43,12 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                 Arc::new(
                     FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
                         file_embeddings.into_iter().map(|embed| Some(embed.into_iter().map(Some).collect::<Vec<_>>())),
-                        EMBEDDING_DIM as i32,
+                        (EMBEDDING_DIM * 2) as i32,
                     ),
                 ),
-                Arc::new(Int32Array::from_iter_values(parsed_file_sizes)),
-                Arc::new(Int32Array::from_iter_values(parsed_file_num_pages))
+                Arc::new(StringArray::from_iter_values(parsed_file_directories)),
+                Arc::new(UInt64Array::from_iter_values(parsed_file_sizes)),
+                Arc::new(UInt64Array::from_iter_values(parsed_file_num_pages))
             ],
         )
         .unwrap()].into_iter().map(Ok),

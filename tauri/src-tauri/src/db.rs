@@ -23,12 +23,13 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
             "vector",
             DataType::FixedSizeList(
                 Arc::new(Field::new("item", DataType::Float32, true)),
-                EMBEDDING_DIM as i32,
+                (EMBEDDING_DIM * 2) as i32,
             ),
             true,
         ),
-        Field::new("File Size", DataType::Int32, false),
-        Field::new("Num Pages", DataType::Int32, false)
+        Field::new("directory", DataType::Utf8, false),
+        Field::new("file_size", DataType::UInt64, false),
+        Field::new("num_pages", DataType::UInt64, false)
     ]));
     
     let batches = RecordBatchIterator::new(
