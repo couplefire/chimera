@@ -18,7 +18,7 @@ fn calculate_name_weight(filename: &str, content: &str) -> f32{
     let content_space_cnt = content.chars().filter(|c| c.is_whitespace()).count() as f32;
     let content_space_frac = content_space_cnt / content.len() as f32;   // usually 1 space every 6 chars
 
-    let name_legitness = name_letter_frac.powf(2.0) * (name_letter_cnt / 30.0 + 1e-5).powf(0.5);
+    let name_legitness = name_letter_frac.powf(1.5) * (name_letter_cnt / 30.0 + 1e-5).powf(0.5);
     let content_legitness = content_space_frac * 6.0 * (content_space_cnt / 2000.0 + 1e-5).powf(0.5);
 
     let logit = name_legitness - content_legitness;
@@ -60,9 +60,11 @@ pub async fn create_embedding_files(parsed_files: Vec<ParsedFile>) -> Result<Vec
         let name_embed = name_res.embedding.clone();
         let content_embed = content_res.embedding.clone();
         let name_weighting = calculate_name_weight(&parsed_file.name, &parsed_file.content.clone().unwrap());
-        let mut filename_embd = name_embed.iter().map(|x| x * name_weighting).collect::<Vec<f32>>();
-        let content_embd = content_embed.iter().map(|x| x * (1.0 - name_weighting)).collect::<Vec<f32>>();
+        let mut filename_embd = name_embed.iter().map(|x| x * (name_weighting + 1e-5).sqrt()).collect::<Vec<f32>>();
+        let content_embd = content_embed.iter().map(|x| x * (1.0 - name_weighting + 1e-5).sqrt()).collect::<Vec<f32>>();
         filename_embd.extend(content_embd);
+        let mag = filename_embd.iter().map(|x| x.powi(2)).sum::<f32>().sqrt();
+        println!("mag: {}", mag);
         filename_embd
     }).collect();
 
