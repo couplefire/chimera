@@ -15,11 +15,18 @@
       "shell": {
         "all": false,
         "open": true
+      }, 
+      "globalShortcut": {
+        "all": true
+      }, 
+      "window": {
+        "hide": true
       }
     },
     "macOSPrivateApi": true, 
     "windows": [
       {
+        "label": "main", 
         "maximized": true,
         "resizable": false,
         "minimizable": false,

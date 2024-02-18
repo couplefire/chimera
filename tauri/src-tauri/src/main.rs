@@ -1,8 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::sync::Arc;
 use serde::Serialize;
 use tauri::Manager;
+use tauri::GlobalShortcutManager;
 
 use db::{DbConnection, init_db};
 use indexer::start_indexing;
@@ -23,7 +25,6 @@ struct SearchResult {
     numPages: Option<u64>,
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
     let prompt_embed = embeddings::create_embedding_prompt(search_text).unwrap();
@@ -51,6 +52,29 @@ fn main() {
                         Ok(_) => println!("Indexing process finished successfully!"),
                         Err(e) => println!("Error while indexing: {}", e),
                     }
+                });
+            }
+
+            let window = app.get_window("main").unwrap();
+            window.hide().unwrap();
+            let window_rc1 = Arc::new(window);
+            let window_rc2 = Arc::clone(&window_rc1);
+
+            {
+                let _toggle = app.app_handle().global_shortcut_manager().register("Cmd+]", move || {
+                    println!("Cmd+] pressed");
+                    if window_rc1.is_visible().unwrap() {
+                        window_rc1.hide().unwrap();
+                    } else {
+                        window_rc1.show().unwrap();
+                    }
+                });
+            }
+
+            {
+                let _hide_esc = app.app_handle().global_shortcut_manager().register("esc", move || {
+                    println!("esc pressed");
+                    window_rc2.hide().unwrap();
                 });
             }
 
