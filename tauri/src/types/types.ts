@@ -1,9 +1,8 @@
-
 export interface SearchResult {
-    fileName: string;
-    directory: string;
+  filename: string;
+  directory: string;
 }
-  
+
 export interface SearchResponse {
-    searchResults: SearchResult[];
+  searchResults: SearchResult[];
 }

@@ -25,18 +25,19 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
 
-            let embed = embeddings::create_embedding_file(ParsedFile {
-                name: path.to_str().unwrap().to_string(),
+            let parsed_file = ParsedFile {
+                name: path.file_name().unwrap().to_str().unwrap().to_string(),
                 content: Some(contents),
                 extension: path.extension().unwrap().to_str().unwrap().to_string(),
                 path: path.to_str().unwrap().to_string(),
-            })?;
+            };
+            let embed = embeddings::create_embedding_file(parsed_file.clone())?;
 
             tbl.add(Box::new(RecordBatchIterator::new(
                 vec![RecordBatch::try_new(
                     db.schema.clone(),
                     vec![
-                        Arc::new(StringArray::from_iter_values(vec![path.to_str().unwrap().to_string()])),
+                        Arc::new(StringArray::from_iter_values(vec![parsed_file.name])),
                         Arc::new(
                             FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
                                 vec![Some(embed.into_iter().map(Some).collect::<Vec<_>>())].into_iter(),

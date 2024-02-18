@@ -1,4 +1,6 @@
 use std::io::Read;
+
+#[derive(Clone)]
 pub struct ParsedFile {
     pub name: String, 
     pub extension: String, 

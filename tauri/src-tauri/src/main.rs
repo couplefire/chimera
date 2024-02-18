@@ -24,9 +24,8 @@ struct SearchResult {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
-    println!("{:?}", state.db.table_names().await.unwrap());
-
-    let result = similarity_search::search(state.inner().clone(), vec![1.0, 2.0, 3.0]).await.unwrap();
+    let prompt_embed = embeddings::create_embedding_prompt(search_text).unwrap();
+    let result = similarity_search::search(state.inner().clone(), prompt_embed).await.unwrap();
 
     Ok(result)
 }
@@ -34,7 +33,7 @@ async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Res
 fn main() {
     tauri::Builder::default()
         .setup(|app| { 
-            let initialize_db = false;
+            let initialize_db = true;
 
             let handle = tauri::async_runtime::spawn(async move { 
                 let db = init_db(initialize_db).await;
