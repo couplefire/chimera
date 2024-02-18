@@ -12,7 +12,12 @@ pub async fn search(db: DbConnection, prompt: Vec<f32>) -> Result<Vec<SearchResu
         file_names.append(&mut batch.column(0).as_any().downcast_ref::<StringArray>().unwrap().into_iter().map(|x| x.unwrap().to_string()).collect::<Vec<_>>());
     }
 
-    Ok(file_names.into_iter().map(|filename| SearchResult { filename, directory: "_placeholder".to_string() }).collect())
+    Ok(file_names.into_iter().map(|filename| SearchResult { 
+        fileName: filename,
+        directory: "test".to_string(),
+        fileSize: 0,
+        numPages: None,
+     }).collect())
 }
 
 async fn cosine_similarity_search(db: DbConnection, prompt: &[f32]) -> Result<Vec<RecordBatch>> {

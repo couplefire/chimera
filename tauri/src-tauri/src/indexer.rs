@@ -30,6 +30,8 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                 content: Some(contents),
                 extension: path.extension().unwrap().to_str().unwrap().to_string(),
                 path: path.to_str().unwrap().to_string(),
+                file_size: 0,
+                num_pages: None
             };
             let embed = embeddings::create_embedding_file(parsed_file.clone())?;
 

@@ -5,7 +5,9 @@ pub struct ParsedFile {
     pub name: String, 
     pub extension: String, 
     pub path: String, 
-    pub content: Option<String>
+    pub content: Option<String>, 
+    pub file_size: u64, 
+    pub num_pages: Option<u64>
 }
 
 impl std::fmt::Debug for ParsedFile {
@@ -20,9 +22,17 @@ impl std::fmt::Debug for ParsedFile {
 }
 
 fn get_pdf_content(path: &str) -> String {
-    let file = std::fs::read(path).unwrap();
-    let out = pdf_extract::extract_text_from_mem(&file).unwrap();
-    out
+    let document = lopdf::Document::load(path).unwrap();
+    let mut content = String::new();
+    for i in 0..document.get_pages().len() {
+        content.push_str(document.extract_text(&[(i+1) as u32]).unwrap().as_str());
+    }
+    content
+}
+
+fn get_pdf_num_pages(path: &str) -> u64 {
+    let document = lopdf::Document::load(path).unwrap();
+    document.get_pages().len() as u64
 }
 
 pub fn parse(path: &str) -> ParsedFile {
@@ -55,9 +65,11 @@ pub fn parse(path: &str) -> ParsedFile {
 
     ParsedFile {
         name,
-        extension,
+        extension: extension.clone(),
         path: path.to_string(),
         content,
+        file_size: std::fs::metadata(path).unwrap().len(),
+        num_pages: if extension == "pdf" { Some(get_pdf_num_pages(path)) } else { None }
     }
 }
 
