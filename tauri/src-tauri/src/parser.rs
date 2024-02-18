@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::fmt;
 
 #[derive(Clone)]
 pub struct ParsedFile {
@@ -9,6 +10,15 @@ pub struct ParsedFile {
     pub file_size: u64, 
     pub num_pages: Option<u64>
 }
+
+/*
+impl fmt::Debug for ParsedFile {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ParsedFile {{ name: {:?}, extension: {:?}, path: {:?}, content: {:?}, file_size: {:?}, num_pages: {:?} }}",
+            self.name, self.extension, self.path, self.content, self.file_size, self.num_pages)
+    }
+}
+*/
 
 impl std::fmt::Debug for ParsedFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

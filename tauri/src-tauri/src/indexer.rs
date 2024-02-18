@@ -23,8 +23,10 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
         if path.is_file() {
             let mut file = fs::File::open(path)?;
             let mut contents = String::new();
-            file.read_to_string(&mut contents)?;
+            //file.read_to_string(&mut contents)?;
+            //println!("Parsing exists");
             let parsed_file = parse(path.to_str().unwrap());
+            // println!("{:?}", parsed_file);
             /*
             let parsed_file = ParsedFile {
                 name: path.file_name().unwrap().to_str().unwrap().to_string(),

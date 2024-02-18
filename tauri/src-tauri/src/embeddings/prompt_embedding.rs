@@ -9,10 +9,8 @@ use std::env;
 pub fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
     let openai_key: String = env::var("OPENAI_API_KEY").unwrap().to_string();
     let client = Client::new(openai_key); 
-
     let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), prompt.to_string()); 
     req.dimensions = Some(EMBEDDING_DIM); 
-
     let result = client.embedding(req)?; 
 
     Ok(result.data[0].embedding.clone())

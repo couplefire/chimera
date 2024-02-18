@@ -18,6 +18,11 @@ pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
     req.dimensions = Some(EMBEDDING_DIM);
 
     let result = client.embedding(req)?; 
+    let mut mag = 0.0;
+    for i in 0..result.data[0].embedding.len() {
+        mag += result.data[0].embedding[i] * result.data[0].embedding[i];
+    }
+    println!("Magnitude of data {}", mag);
     Ok(result.data[0].embedding.clone())
 }
 
