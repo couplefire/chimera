@@ -1,6 +1,8 @@
 export interface SearchResult {
-  filename: string;
-  directory: string;
+    fileName: string;
+    directory: string;
+    fileSize: number;
+    numPages: number | null;
 }
 
 export interface SearchResponse {

@@ -17,13 +17,19 @@
         "open": true
       }
     },
+    "macOSPrivateApi": true, 
     "windows": [
       {
-        "fullscreen": false,
-        "resizable": true,
-        "title": "semantic-files",
-        "width": 800,
-        "height": 600
+        "maximized": true,
+        "resizable": false,
+        "minimizable": false,
+        "closable": false, 
+        "focus": true, 
+        "transparent": true,
+        "decorations": false, 
+        "alwaysOnTop": true, 
+        "hiddenTitle": true, 
+        "skipTaskbar": true
       }
     ],
     "security": {

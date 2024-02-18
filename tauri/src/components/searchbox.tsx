@@ -14,7 +14,7 @@ function SearchBox({ onSearchChange }: SearchBoxProps ) {
   return (
     <input
       type="text"
-      placeholder="Search by what the file is about"
+      placeholder="Search"
       onChange={handleChange}
       className={styles.searchBox}
     />

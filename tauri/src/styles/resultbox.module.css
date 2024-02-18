@@ -1,28 +1,45 @@
 
-.logo{
-    width: 40px;
+.logo {
+    width: 50px;
     height: auto;
     margin-right: 20px;
 }
 
-.container{
-    height: 40px;
+.container {
+    height: 50px;
     display: flex;
     align-items: center;
-    margin-top: 6px;
+    width: 100%;
+    overflow-x: scroll;
+    overflow-y: hidden;
 }
 
-.textContainer{
+.container::-webkit-scrollbar {
+    display: none;
+}
+
+.textContainer {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    /* gap: 5px; */
 }
 
-.filename{
-    font-size: 1.5em;
-    margin: 0 0;
+.topLevel {
+    margin-bottom: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    color: white;
+    font-size: 1.6em;
 }
 
-.directory{
-    font-size: 1em;
-    margin: 0 0;
+.bottomLevel {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    color: #d3d3d3; 
+    font-size: 0.8em;
+    gap: 10px;
 }

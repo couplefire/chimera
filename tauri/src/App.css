@@ -3,4 +3,22 @@
   left: 50%; 
   top: 100px; 
   transform: translateX(-50%); 
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  width: 800px;
+
+  color: #f6f6f6;
+  background-color: #2f2f2f;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.25), 0 15px 30px 0 rgba(0, 0, 0, 0.22);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  margin: 0 auto;
 }

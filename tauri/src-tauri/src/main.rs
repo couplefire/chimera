@@ -17,8 +17,10 @@ pub const EMBEDDING_DIM: i32 = 128;
 
 #[derive(Serialize)]
 struct SearchResult {
-    filename: String,
+    fileName: String,
     directory: String,
+    fileSize: u64, 
+    numPages: Option<u64>,
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
