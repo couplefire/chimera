@@ -26,18 +26,7 @@ struct SearchResult {
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
     println!("{:?}", state.db.table_names().await.unwrap());
 
-    similarity_search::search(state.inner().clone(), vec![1.0, 2.0, 3.0]).await.unwrap();
-
-    let result = vec![
-        SearchResult {
-            filename: "Hello".to_string(),
-            directory: "World".to_string(),
-        },
-        SearchResult {
-            filename: search_text.to_string(),
-            directory: "suck".to_string(),
-        },
-    ];
+    let result = similarity_search::search(state.inner().clone(), vec![1.0, 2.0, 3.0]).await.unwrap();
 
     Ok(result)
 }
