@@ -72,7 +72,6 @@ fn main() {
 
             {
                 let _toggle = app.app_handle().global_shortcut_manager().register("Cmd+]", move || {
-                    println!("Cmd+] pressed");
                     if window_rc1.is_visible().unwrap() {
                         window_rc1.hide().unwrap();
                     } else {
@@ -83,7 +82,6 @@ fn main() {
 
             {
                 let _hide_esc = app.app_handle().global_shortcut_manager().register("esc", move || {
-                    println!("esc pressed");
                     window_rc2.hide().unwrap();
                 });
             }
