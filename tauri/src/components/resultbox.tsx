@@ -3,14 +3,13 @@ import { getLogoByExtension } from "../utils/logoutils";
 import styles from "../styles/resultbox.module.css";
 
 interface ResultBoxProps {
-    isActive: boolean;
     result: SearchResult;
 }
 
 
-function SearchBox({ isActive, result }: ResultBoxProps ) {
-    const file_extension = result.directory.split('.').pop(); 
-    const logo_path = getLogoByExtension(file_extension);
+function SearchBox({ result }: ResultBoxProps ) {
+    const file_extension = result.directory.split('.').pop() ?? 'aosdfadi'; 
+    const logo_path = getLogoByExtension(file_extension, result.directory);
 
     const renderDirectory = (directory: string) => {
         const maxDisplayLength = 20;
@@ -20,7 +19,7 @@ function SearchBox({ isActive, result }: ResultBoxProps ) {
             currentPath = parts.pop() + '/' + currentPath;
         }
         if (currentPath.length > maxDisplayLength) {
-            currentPath = currentPath.slice(0, maxDisplayLength - 3) + '...';
+            currentPath = '...' + currentPath.slice(-maxDisplayLength + 3);
         } else if (parts.length > 0) {
             currentPath = '...' + '/' + currentPath;
         }
@@ -40,7 +39,7 @@ function SearchBox({ isActive, result }: ResultBoxProps ) {
     }
 
     return (
-        <div className={`${styles.resultBox} ${isActive ? styles.active : ''}`}>
+        <div className={`${styles.resultBox}`}>
             <div className={styles.container}>
                 <img src={logo_path} className={styles.logo} />
                 <div className={styles.textContainer}>

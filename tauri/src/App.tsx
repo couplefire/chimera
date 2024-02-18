@@ -9,7 +9,6 @@ import "./App.css";
 
 function App() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [activeResult, setActiveResult] = useState<number>(0);
 
   useEffect(() => {
     window.addEventListener('click', (e: MouseEvent) => {
@@ -18,20 +17,9 @@ function App() {
       }
     });
 
-    window.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown') {
-        setActiveResult((activeResult + 1) % searchResults.length);
-      } else if (e.key === 'ArrowUp') {
-        setActiveResult((activeResult - 1 + searchResults.length) % searchResults.length);
-      }
-    });
-
     return () => {
       window.removeEventListener('click', () => {
         appWindow.hide();
-      });
-      window.removeEventListener('keydown', () => {
-        setActiveResult(0);
       });
     }
   }, [])
@@ -41,7 +29,6 @@ function App() {
     if (res) {
       const searchResults = res as SearchResult[];
       setSearchResults(searchResults);
-      setActiveResult(0);
     };
   };
 
@@ -52,7 +39,7 @@ function App() {
       <SearchBox onSearchChange={debouncedSearch} />
       <div className="results">
         {searchResults.map((result, index) => (
-          <ResultBox key={index} isActive={index === activeResult} result={result} />
+          <ResultBox key={index} result={result} />
         ))}
       </div>
     </div>

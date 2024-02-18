@@ -31,7 +31,7 @@ async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Res
         return Ok(Vec::new());
     }
 
-    let prompt_embed = embeddings::create_embedding_prompt(search_text).unwrap();
+    let prompt_embed = embeddings::create_embedding_prompt(search_text).await.unwrap();
     let result = similarity_search::search(state.inner().clone(), prompt_embed).await.unwrap();
 
     Ok(result)

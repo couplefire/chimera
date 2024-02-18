@@ -1,22 +1,14 @@
-interface LogoMap {
-    [key: string]: string;
-}
-  
-const logoMap: LogoMap = {
-    txt: '../public/txt.svg',
-    pdf: '../public/pdf.svg',
-    cpp: '../public/cpp.svg',
-    java: '../public/java.svg',
-    javascript: '../public/javascript.svg',
-    typescript: '../public/typescript.svg',
-    python: '../public/python.svg',
-    rust: '../public/rust.svg',
-    // Add more mappings as needed
-};
+import { fileIcons } from "./ext_to_icon";
 
-export const getLogoByExtension = (extension: string | undefined): string => {
-    if (!extension) {
-        return '../public/default.svg';
+export const getLogoByExtension = (extension:string, path: string | undefined): string => {
+    let fileIcon = fileIcons.find((icon) => {
+        return icon.fileExtensions?.includes(extension) || icon.fileNames?.some(name => {
+            return path?.endsWith(name);
+        })
+    });
+    if (fileIcon) {
+        return '../public/' + fileIcon.name + '.svg';
+    } else {
+        return '../public/yaml.svg';
     }
-    return logoMap[extension.toLowerCase()] || '../public/default.svg';
 };
