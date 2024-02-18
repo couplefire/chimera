@@ -15,7 +15,7 @@ mod similarity_search;
 mod embeddings;
 mod parser;
 
-pub const EMBEDDING_DIM: i32 = 128;
+pub const EMBEDDING_DIM: u32 = 128;
 
 #[derive(Serialize)]
 struct SearchResult {
@@ -27,7 +27,7 @@ struct SearchResult {
 
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
-    let prompt_embed = embeddings::create_embedding_prompt(search_text).unwrap();
+    let prompt_embed = embeddings::create_embedding_prompt(search_text).await.unwrap();
     let result = similarity_search::search(state.inner().clone(), prompt_embed).await.unwrap();
 
     Ok(result)

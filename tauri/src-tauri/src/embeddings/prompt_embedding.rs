@@ -1,17 +1,16 @@
-use openai_api_rs::v1::api::Client; 
-use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL; 
-use openai_api_rs::v1::embedding::EmbeddingRequest; 
 use anyhow::Result;
+use async_openai::{types::{CreateEmbeddingRequest, EmbeddingInput}, Client};
 
 use crate::EMBEDDING_DIM; 
-use std::env;
 
-pub fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
-    let openai_key: String = env::var("OPENAI_API_KEY").unwrap().to_string();
-    let client = Client::new(openai_key); 
-    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), prompt.to_string()); 
-    req.dimensions = Some(EMBEDDING_DIM); 
-    let result = client.embedding(req)?; 
+pub async fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
+    let client = Client::new(); // looks for OPENAI_API_KEY environment variable
+    let result = client.embeddings().create(CreateEmbeddingRequest {
+        model: "text-embedding-3-small".to_string(),
+        input: EmbeddingInput::String(prompt.to_string()),
+        dimensions: Some(EMBEDDING_DIM),
+        ..Default::default()
+    }).await?;
 
     Ok(result.data[0].embedding.clone())
 }

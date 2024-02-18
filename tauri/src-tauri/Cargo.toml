@@ -22,8 +22,8 @@ tokio = "1.36.0"
 futures = "0.3.30"
 arrow-schema = "50.0.0"
 arrow-array = "50.0.0"
-openai-api-rs = "4.0.7"
 lopdf = "0.32.0"
+async-openai = "0.18.3"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

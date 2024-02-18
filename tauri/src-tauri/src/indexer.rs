@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 use std::fs;
 use std::io::Read;
 use std::sync::Arc;
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use crate::db::DbConnection;
 use crate::{embeddings, EMBEDDING_DIM};
@@ -21,23 +21,8 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
         let entry = entry?;
         let path = entry.path();
         if path.is_file() {
-            let mut file = fs::File::open(path)?;
-            let mut contents = String::new();
-            //file.read_to_string(&mut contents)?;
-            //println!("Parsing exists");
             let parsed_file = parse(path.to_str().unwrap());
-            // println!("{:?}", parsed_file);
-            /*
-            let parsed_file = ParsedFile {
-                name: path.file_name().unwrap().to_str().unwrap().to_string(),
-                content: Some(contents),
-                extension: path.extension().unwrap().to_str().unwrap().to_string(),
-                path: path.to_str().unwrap().to_string(),
-                file_size: ,
-                num_pages: Some(num_pages),
-            };
-            */
-            let embed = embeddings::create_embedding_file(parsed_file.clone())?;
+            let embed = embeddings::create_embedding_file(parsed_file.clone()).await.with_context(|| format!("Failed to index file {}", parsed_file.name))?;
 
             tbl.add(Box::new(RecordBatchIterator::new(
                 vec![RecordBatch::try_new(
@@ -47,7 +32,7 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                         Arc::new(
                             FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
                                 vec![Some(embed.into_iter().map(Some).collect::<Vec<_>>())].into_iter(),
-                                EMBEDDING_DIM,
+                                EMBEDDING_DIM as i32,
                             ),
                         ),
                         Arc::new(Int32Array::from_iter_values(vec![parsed_file.file_size as i32])),

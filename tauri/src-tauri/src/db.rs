@@ -23,7 +23,7 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
             "vector",
             DataType::FixedSizeList(
                 Arc::new(Field::new("item", DataType::Float32, true)),
-                EMBEDDING_DIM,
+                EMBEDDING_DIM as i32,
             ),
             true,
         ),
@@ -39,13 +39,7 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
     if initialize_db {
         let _ = our_db.drop_table("files").await;
         let _ = our_db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
-        let db_connect = DbConnection{
-            db: our_db.clone(),
-            schema: our_schema.clone(),
-        } ;
-        start_indexing(db_connect);
-        //let _ =  db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
-    };
+    }
 
     DbConnection {
         db: our_db,

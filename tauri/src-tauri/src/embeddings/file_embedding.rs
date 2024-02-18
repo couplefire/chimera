@@ -1,23 +1,24 @@
-use openai_api_rs::v1::api::Client; 
-use openai_api_rs::v1::common::TEXT_EMBEDDING_3_SMALL; 
-use openai_api_rs::v1::embedding::EmbeddingRequest; 
 use anyhow::Result;
+use async_openai::types::{CreateEmbeddingRequest, EmbeddingInput};
+use async_openai::Client;
 
 use crate::parser::ParsedFile;
 use crate::EMBEDDING_DIM; 
-use std::env;
 
-pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
-    let openai_key: String = env::var("OPENAI_API_KEY").unwrap().to_string();
-    let client = Client::new(openai_key); 
+pub async fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
+    let client = Client::new(); // looks for OPENAI_API_KEY environment variable
 
     let mut combined_str = parsed_file.name;
     combined_str.push_str("\n");
     combined_str.push_str(&parsed_file.content.unwrap());
-    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), combined_str); 
-    req.dimensions = Some(EMBEDDING_DIM);
 
-    let result = client.embedding(req)?; 
+    let result = client.embeddings().create(CreateEmbeddingRequest {
+        model: "text-embedding-3-small".to_string(),
+        input: EmbeddingInput::StringArray(vec![combined_str]),
+        dimensions: Some(EMBEDDING_DIM),
+        ..Default::default()
+    }).await?;
+
     let mut mag = 0.0;
     for i in 0..result.data[0].embedding.len() {
         mag += result.data[0].embedding[i] * result.data[0].embedding[i];
