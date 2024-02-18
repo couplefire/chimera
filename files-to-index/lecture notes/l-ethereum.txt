@@ -1,0 +1,177 @@
+6.824 2023 Lecture 23: Smart Contracts / Ethereum (2014)
+
+topic: programmable blockchains for decentralized applications: motivation, developer interface, underlying implementation, applications
+
+old: centralized app
+  example apps: financial exchange, DNS/PKI, casino
+  frontend (client) <-> backend (service), written by app operator
+  disadvantage: have to trust app author / service operator
+    what can go wrong: malicious operator, compromised operator
+      financial exchange: e.g. front-running
+      DNS: e.g. compromised domain
+      casino: e.g. increasing house edge
+  does open-source code solve the problem?
+  can't tell if backend is running honestly
+    can run different code altogether, manipulate database contents directly, ...
+  demo: coin flip casino mental game
+
+new: decentralized (trust-less) app
+  goal: reduced trust or no trust in site operator
+  replace backend with some trust-less (decentralized?) service
+  could imagine using bespoke solutions
+    e.g. casino: signed commitments before bets are placed
+  ambitious goal: support large class of apps in a general-purpose and easy-to-program way
+    cloud -> new compute layer for decentralized apps
+  how might this work?
+    "world computer"
+    behaves like single shared machine
+      security / single source of truth
+      enforces integrity (not confidentiality)
+    open participation
+    offers compute + storage
+    anyone can load programs onto it (program ~= state machine)
+    all state is public
+    built-in currency system: to pay for compute, etc.
+
+demo: what is the interface to the world computer?
+  smart contracts ~= programs
+    neither smart, nor contracts (in the legal sense)
+  billboard example (Billboard.sol)
+    remix ide
+    write programs in high-level language (solidity)
+    smart contracts are instances of programs, with state and methods
+      state machines
+    contract's state includes its balance
+    compile and deploy programs at an address
+    externally-owned accounts can call programs' methods, send value
+    not on real network yet: in-memory vm
+
+ethereum
+  key idea: programmable computer implemented as a replicated state machine
+  implemented on top of POS blockchain (used to be POW), batching txns into blocks
+  6.824 picture: replicated state machine on top of a shared log
+  meta state machine where you can load and run programs
+  state of world computer
+    address ->
+      | externally owned account { balance }
+      | contract account { balance, code, state }
+  operations
+    tx :=
+    | deploy contract (code, value)
+    | message (address, method, data, value)
+  transition function / semantics
+    deploy contract
+      takes contract code
+      chooses a fresh address and makes contract code available at that address
+      initializes state to initial values
+      sets balance to initial value
+      runs constructor
+      returns address
+    message
+      takes address, method, data, value
+      looks up address: if externally-owned account, just transfers value
+      looks up code, looks up method
+      adds value to contract's balance
+      runs method with data given as an argument, starting from the initial state
+      produces a new state
+  EVM: low-level language to support smart contracts
+    many HLLs that compile to EVM
+    Turing-complete -> gas
+    run out of gas -> transaction abort
+  casino example (Casino.sol)
+    deploy on real (testnet) ethereum network
+    anyone can interact with its methods
+    remix ide (web app) interacts with metamask (wallet app / browser extension)
+      how does metamask work: the browser extension holds the private key and
+      signs transactions, and it injects a global JavaScript API into websites
+      in the window.ethereum object; the browser extension interacts with the
+      blockchain through a proxy server (hosted by the Metamask developers)
+    etherscan
+
+applications of smart contracts
+  ethereum name service (ENS)
+    basic version: first-come, first-served map[string]address
+  ERC20 tokens
+    basically, bank (~ bitcoin) state machine as a smart contract
+    issue tokens
+    track balances for every user
+    trade tokens
+    examples
+      stock: initial sale via auction, pays dividends to token holders, token holders can vote
+      asset-backed tokens (e.g. USDC), eases international finance
+      rewards programs (e.g. airline miles)
+    demo: stable coin (StableCoin.sol)
+  DeFi, decentralized exchanges
+    trade ERC20 tokens
+  decentralized governance (DAOs)
+    self-modifying code (through a level of indirection)
+    DAO members can vote on how to evolve the DAO code
+    e.g., decentralized investment fund, group votes on what to invest in
+
+dapps in practice: bridging ethereum and web apps
+  usually, a portion of an app is implemented using smart contracts
+  still use backend compute running on standard cloud
+
+advanced smart contracts: complexities in the programming model
+  (not a complete list)
+  some things we haven't seen in the demos
+    contracts can call other contracts' methods (and send ether)
+      optionally with a gas limit
+    create other contracts
+    try/catch
+  demo: reentrancy attack on StableCoin (StableCoinAttacker.sol)
+  emergent complexity
+    what if you run out of gas in the middle of executing a contract?
+      transaction abort: writes reverted and leftover gas refunded
+    what if you call another contract, and that runs out of gas?
+      entire transaction aborts: all state changes reverted
+    what happens if your contract encounters an error (e.g. div by zero)?
+      transaction abort, state reverted
+    what happens if a callee contract encounters an error?
+      same thing: transaction abort, error bubbles up
+    try/catch
+      on error, only callee's changes are reverted
+    working around immutability
+      contracts can call other contracts
+      contracts can "indirect branch", e.g. call(address=storage[0])
+      mutating storage can change code that contract runs
+    oracles
+      how to access data outside the blockchain?
+      trusted oracle
+        two step process; step 1: ask oracle for something (e.g., price of $AAPL stock), supply callback function
+        step 2: oracle calls back contract with value (e.g., current stock price)
+      decentralized protocol like SchellingCoin
+
+limitations + has ethereum lived up to its vision
+  limited compute capacity
+  limited storage capacity
+  no secret data
+  deterministic; "randomness" under control of miners
+  transactions are public before they are executed: front-running transactions
+  need for oracles to interact with data outside system
+  "code is law", immutable code, irreversible transactions: not always a good thing
+    DAO incident, hard fork, ETH vs ETC
+  not so easy to program
+    bugs
+      https://rekt.news/
+    new programming model and environment, sometimes unintuitive semantics
+      e.g. funds transfer is a message, contracts can "implement" a handler for this message
+        e.g. reentrancy vulnerability, exploited in many real-world attacks
+      
+          Withdraw():
+            sender.transfer(balance[sender])
+            balance[sender] = 0
+
+    hostile and poorly-understood programming environment, e.g. flash loans
+      trustless loans (within a single transaction)
+      implemented using callbacks and careful programming with try/catch
+
+Q: where do contracts execute?
+A: on all full nodes, any miner producing a new block or validating a block executes the transactions
+
+Q: how do you choose a gas price?
+A: based on network congestion, tools to help like https://ethgasstation.info/
+
+Q: how do you choose a gas limit?
+A: wallets can help estimate gas cost
+  (e.g. how much gas do you need to run the transaction given the current state of the system)

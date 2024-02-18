@@ -1,0 +1,245 @@
+6.5840 Lecture 24: Formal verification of distributed systems (Grove)
+
+Why this lecture?
+A number of students have asked about formal verification for distributed
+systems, so we wanted to spend some lecture time talking about it. The paper
+for this lecture, Grove, is very recent research in the area.
+Here's the plan for today's lecture:
+* First, talk about GroveKV system, the "case study" distributed system verified
+  with Grove.
+* Then, some motivation and general background about verification.
+* Main thing: how Grove reasons about code like GroveKV.
+* Finally, we can reflect on what Grove actually accomplished and its limits
+  (and those of verification in general).
+
+--------------------------------------------------------------------------------
+GroveKV is a fault-tolerant, linearizable KV service.
+
+KV service → clerk with Put and Get operations. Operations happen exactly once.
+Fault tolerance → Crash-safe and reconfigurable.
+If all servers crash, should be able to restart them without losing any state or
+any violations of linearizability.
+If a few servers are down, then should be able to reconfigure to use the
+remaining online servers in a consistent way. A put that was acknowledged before
+reconfiguration should be there after reconfiguration.
+
+GroveKV's goals similar to lab 3. Lab 3 is also a fault-tolerant KV service.
+Implemented differently though, GroveKV uses primary/backup replication instead
+of Raft.
+
+A "bonus" feature: fast reads based on leases.
+Similar to how leases are used in Chain Replication.
+
+[ Diagram of different servers in GroveKV ]
+To do reconfiguration (adding/removing servers consistently) GroveKV uses
+a configuration service. Without a config service, two backups might be network
+partitioned from each other and both want to become a primary, which would be wrong.
+Same issue as VMWare-FT.
+In GroveKV specifically, the config service is just a single server.
+It should be fault-tolerant with Raft/Paxos/etc.; think of ZooKeeper.
+The Grove authors plan to make the config service Paxos replicated in the near
+future.
+
+Reconfiguration is a program that "facilitates" configuration change.  You can
+imagine an admin logging into a machine and running `reconfigure`, or a failure
+detector on some machine doing it automatically. Importantly, it is *always* be
+safe to attempt reconfiguration.
+
+Code fragments:
+1) replication:
+   Primary uses goroutines to replicate to other servers. System is built with
+   RPCs. LocalApply updates KV map, and writes to log. With $f+1$ servers (+ the
+   config service), tolerates $f$ faults.
+   Concurrency: have to hold on to lock while doing this stuff.
+   nextIndex determines order.
+   Have to wait for all to reply because PB means EVERYONE has to ack an op
+   before replying to the client.
+
+2) reconfiguration
+   Makes use of configuration service.
+   Idea: "seal" the current group of servers, get a copy of state from them,
+   install the state to new servers.
+   There might be concurrent reconfiguration attempts so use "epoch numbers" to
+   make sure only one reconfiguration succeeds. The epoch numbers are like Raft
+   term numbers.
+   Because it's PB, only have to reach 1 of the old servers.
+
+3) reads based on leases
+   Idea: do reads from primary.
+   What's wrong with the naive example?
+   The primary gets all the ops from the client, so
+   this seems plausible. But, need to deal with reconfiguration happening
+   without primary knowing it.
+   Problematic execution: backup from epoch 1 becomes primary in epoch 2,
+   without primary of epoch 1 knowing about it. Similar issues in Raft are why
+   the leader has to replicate Get operations (otherwise would read stale state).
+
+   With leases: server replies to Get without coordinating with anyone else.
+   Assume loosely synchronized clocks. GetTimeRange: returns {earliest, latest}
+   s.t. earliest <= current time <= latest.
+   NTP (network time protocol) with error bounds, or e.g. AWS time sync
+   https://github.com/aws/clock-bound
+   Puts can happen concurrently with Gets; get waits for previous puts to
+   finish.
+   Configuration service can't enter new epoch until every lease is expired.
+
+---
+Commonly, developers write tests to make sure code is correct.
+Challenge: lots of scenarios ("what if" questions), easy to miss something.
+Idea of verification is to prove: "∀ scenarios, code behaves correctly".
+
+Needs a mathematical model for how code executes.
+Needs a definition of "correctly". This is called the _specification_. In
+principle, could do this with pen and paper.
+To make it so that the developer doesn't have to worry about messing up the
+proof (might be easy to mess stuff up with lots of lines of code), use a
+mechanized proof checker.
+[ Formal verification diagram ]
+Human writes code, proof, and spec.
+
+What Grove is about:
+ - Proving "∀ theorems" by going "line-by-line" in code.
+ Cool part:
+ With the right setup, can verify system by going "line-by-line" and cover all
+ the what-if scenarios without having to list them all out.
+ Examples of this further down.
+
+---
+Specs: pre + postconditions.
+E.g. { is_sorted a } bsearch(a, x) { RET i, a[i] = x ... }
+
+How to specify GroveKV?
+Pre+postcondition has to make sense across machines and with possible crashes
+and restarts happening in the middle.
+
+Grove builds on top of Concurrent Separation Logic (CSL).
+CSL is a formal verification approach that was originally designed for
+concurrent (non-distributed) programs. Grove extends CSL to distributed systems.
+First, let's talk a bit about CSL.
+
+Key idea from CSL: reason about code in terms of _ownership of resources_.
+"In separation logic, assertions not only describe what is true about a system’s
+state, but also what parts of the state are 4 logically owned by the thread
+executing the code at that point."
+Classic example of CSL is "heap points-to": x ↦ v. As long as one thread
+(logically) owns a points-to, it knows that the value of that address is
+unchanged. Also, can safely write to it without needing to worry about data
+races.
+This is the crux of what allows profos in Grove to work without having to
+consider concurrently executed code.
+x ↦ 10 ∗ y ↦ 3 read as "x points to 10 and separately y points to 3".
+
+GroveKV spec:
+  { k ↦ w } clerk.Put(k, v) { k ↦ v }
+  { k ↦ v } clerk.Get(k, v) { ret v, k ↦ v }
+This spec is technically a weaker version of the real GroveKV spec, since it
+insists that you fully own the key in order to call Put. E.g. this disallows
+Put's to the same key. The full spec actually allows for Puts to the same key,
+and specifies that they should happen in a "linearizable" way; it uses a
+fancier specification technique called "logical atomicity". Will discuss this
+technically weaker spec, which gets to the heart of ownership-based reasoning.
+[Example walkthrough of using Put/Get specs]
+
+---
+How to specify ApplyAsBackupRPC?
+Often want to think about the system more "abstractly" than in terms of the
+contents of each nodes heap.
+E.g. the Raft paper talks about the abstract log of operations that are
+committed.
+Want to be able to do this formally, and use it to specify ApplyAsBackupRPC.
+Idea from CSL: Ghost resources.
+Help talk about system at a more abstract level than, e.g., heap points-tos.
+Represents "ghost state": state that is not physically present in the system,
+but is useful for specification and proof. Ghost resources are controlled by the
+proof.
+
+Want to model at a high-level the replica servers with a "log of operations".
+Do this by using an "append-only list" resource.
+a ↦ ℓ: points-to is like the points-tos before: exact ownership.
+Because it's append-only, it makes sense to talk about a lower bound.
+a ⊒ ℓ: Lower-bounds shows up on the primary. The primary can't own the backups'
+lists. Only needs to know that same ops are definitely in the backups' logs. OK
+if there are more. Does not denote ownership of anything, only knowledge.
+a ↦□ ℓ: Means that the append-only list a has value ℓ, and will never be
+modified again. During reconfiguration, one of the old replica servers promises
+not to add any more operations. Capture this with ghost resources via knowledge
+of a "frozen list".
+
+Model PB by having each server own an append-only list points-to.
+Also committed append-only list.
+
+Invariant: something that has to always be true. In the case of ownership,
+resources that have to always be available. The resources are owned not by any
+particular thread, but by the invariant itself.
+
+ApplyAsBackupRPC spec: promises to accept operation.
+[ Proof walkthrough ]
+
+Time-bounded invariants:
+ tinv(A, L) (written with dashed-box in paper and slides) means A is available
+ for as long as L is valid. L is a name for this particular tinv.
+ L >= t means L is valid until at least t.
+ When doing GetTimeRange(), if latest < t, the tinv library provides a rule that
+ allows temporary access to the underlying resource.
+ In GroveKV, when verifying Get(),
+
+---
+What if...
+* Backup loses operations?
+  Would be buggy.
+  In ApplyAsBackupRPC, backup promised a ⊒ ops + [op], which meant it had a ↦
+  ops + [op] at some point. There's just no way to do an update that goes
+  backwards. If the backup code ever decides to undo an operation, the proof
+  would get stuck because the physical state and the accepted ghost list would
+  go out of sync.
+* What if old primary does a Put during reconfig?
+  Would be buggy.
+  Bug would appear if a primary tried to do an operation after having responded
+  to a Seal request, because the primary would be left with a ↦□ ops.
+* What if lease expires in the middle of Get?
+  Still ok. Everything was done in the proof at the moment that GetTimeRange
+  runs.
+
+---
+(When) is verification worth it?
+This kind of verification is currently a research endeavor.
+Proving theorems can eliminate some classes of bugs. Not necessarily all bugs
+that matter in practice.
+E.g. specs proven with Grove don't guarantee liveness, i.e. it's OK for code to
+loop forever at any moment.
+
+Writing proofs is a lot like writing code. Have little modules, once in a while
+have to refactor to clean things up, break proof up into smaller lemmas (like
+breaking code up into different functions).
+
+Writing good tests takes time, as does tracking down and fixing bugs
+revealed by tests. Tests might also miss bugs, so one has to weigh the cost of
+bugs in production v.s. the overhead of writing proofs. Writing a proof requires
+a lot of effort. Not familiar with any quantitative studies that compare
+building a verified system v.s. the traditional practice of testing the code.
+The proof for GroveKV probably took on the order of 6 person-months of work.
+
+Grove is a research project and making it economical for developers to prove
+real systems would at minimum require a lot of engineering work to improve the
+proof framework. Becoming proficient with writing these kind of proofs also
+takes time, which would be a big up-front cost for distributed systems
+developers.
+
+There are more lightweight tools for formally checking some properties for
+distributed system. For instance, AWS has made use of some more lightweight
+formal methods for many years
+(https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf), mainly
+focusing on checking some properties about high-level protocols, not fully
+verifying a system implementation.
+
+How much work to verify the whole system?
+Figure 5.
+Overall proof effort 19,347 lines of proof code.
+* "Easy" program steps
+* pure math reasoning (e.g. l1 ⪯ l2 ∧ l1[l2.len() - 1] = x → l1 = l2.)
+* Some of it is "ghost code" (e.g. mutating append-only list)
+* Some of it is defining invariants (e.g. replication invariant).
+
+Q: What about verifying Raft?
+A: In principle possible. In practice, we haven't done it so there might be
+unexpectedly hard to overcome challenges.
