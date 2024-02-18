@@ -7,23 +7,46 @@ use crate::parser::ParsedFile;
 use crate::EMBEDDING_DIM; 
 use std::env;
 
+fn sigmoid(x: f32) -> f32 {
+    1.0 / (1.0 + f32::exp(-x))
+}
+
+fn calculate_name_weight(name: &str) -> f32{
+    let count = name.chars().filter(|c| c.is_alphabetic()).count();
+    let frac = count as f32 / name.len() as f32;
+    sigmoid((frac - 0.5)* 12.0) * 0.6  // shouldn't exceed 1
+}
+
+fn clip_string(s: &str, max_len: usize) -> String {
+    if s.len() > max_len {
+        s.chars().take(max_len).collect()
+    } else {
+        s.to_string()
+    }
+}
+
 pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
     let openai_key: String = env::var("OPENAI_API_KEY").unwrap().to_string();
     let client = Client::new(openai_key); 
 
-    let mut combined_str = parsed_file.name;
-    combined_str.push_str("\n");
-    combined_str.push_str(&parsed_file.content.unwrap());
-    let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), combined_str); 
-    req.dimensions = Some(EMBEDDING_DIM);
+    let filename = parsed_file.name;
+    let mut content = parsed_file.content.unwrap();
+    let mut name_req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), filename.clone()); 
+    name_req.dimensions = Some(EMBEDDING_DIM);
 
-    let result = client.embedding(req)?; 
-    let mut mag = 0.0;
-    for i in 0..result.data[0].embedding.len() {
-        mag += result.data[0].embedding[i] * result.data[0].embedding[i];
-    }
-    println!("Magnitude of data {}", mag);
-    Ok(result.data[0].embedding.clone())
+    content = clip_string(content.as_str(), 2000);
+    let mut content_req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), content); 
+    content_req.dimensions = Some(EMBEDDING_DIM);
+
+    let filename_embd = (client.embedding(name_req)?).data[0].embedding.clone(); 
+    let content_embd = (client.embedding(content_req)?).data[0].embedding.clone(); 
+
+    let name_weighting = calculate_name_weight(&filename);
+    let mut filename_embd = filename_embd.iter().map(|x| x * name_weighting).collect::<Vec<f32>>();
+    let content_embd = content_embd.iter().map(|x| x * (1.0 - name_weighting)).collect::<Vec<f32>>();
+    filename_embd.extend(content_embd);
+
+    Ok(filename_embd)
 }
 
 

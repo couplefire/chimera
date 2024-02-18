@@ -11,9 +11,10 @@ pub fn create_embedding_prompt(prompt: &str) -> Result<Vec<f32>> {
     let client = Client::new(openai_key); 
     let mut req = EmbeddingRequest::new(TEXT_EMBEDDING_3_SMALL.to_string(), prompt.to_string()); 
     req.dimensions = Some(EMBEDDING_DIM); 
-    let result = client.embedding(req)?; 
+    let mut embd = (client.embedding(req)?).data[0].embedding.clone(); 
+    embd.extend(embd.clone());
 
-    Ok(result.data[0].embedding.clone())
+    Ok(embd)
 }
 
 // fn create_embedding_file_content(file_content: &str) -> Result<(), Box<dyn std::error::Error>> {

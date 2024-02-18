@@ -47,7 +47,7 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                         Arc::new(
                             FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
                                 vec![Some(embed.into_iter().map(Some).collect::<Vec<_>>())].into_iter(),
-                                EMBEDDING_DIM,
+                                EMBEDDING_DIM * 2,
                             ),
                         ),
                         Arc::new(StringArray::from_iter_values(vec![parsed_file.path])),

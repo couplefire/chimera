@@ -23,7 +23,7 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
             "vector",
             DataType::FixedSizeList(
                 Arc::new(Field::new("item", DataType::Float32, true)),
-                EMBEDDING_DIM,
+                EMBEDDING_DIM * 2,
             ),
             true,
         ),

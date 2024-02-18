@@ -27,7 +27,7 @@ pub async fn search(db: DbConnection, prompt: Vec<f32>) -> Result<Vec<SearchResu
 }
 
 async fn cosine_similarity_search(db: DbConnection, prompt: &[f32]) -> Result<Vec<RecordBatch>> {
-    if prompt.len() != EMBEDDING_DIM as usize {
+    if prompt.len() != 2 * EMBEDDING_DIM as usize {
         return Err(anyhow::anyhow!("Prompt must be 128-dimensional"));
     }
 
