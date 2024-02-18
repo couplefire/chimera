@@ -50,8 +50,9 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                                 EMBEDDING_DIM,
                             ),
                         ),
-                        Arc::new(Int32Array::from_iter_values(vec![parsed_file.file_size as i32])),
-                        Arc::new(Int32Array::from_iter_values(vec![parsed_file.num_pages.unwrap_or_default() as i32]))
+                        Arc::new(StringArray::from_iter_values(vec![parsed_file.path])),
+                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.file_size])),
+                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.num_pages.unwrap_or_default()]))
                     ],
                 )
                 .unwrap()].into_iter().map(Ok),
