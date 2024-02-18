@@ -55,7 +55,7 @@ pub fn parse(path: &str) -> ParsedFile {
         .to_string();
     let extension = path_obj
         .extension()
-        .unwrap()
+        .unwrap_or_default()
         .to_str()
         .unwrap()
         .to_string();
@@ -70,7 +70,12 @@ pub fn parse(path: &str) -> ParsedFile {
             file.read_to_string(&mut content).unwrap();
             Some(content)
         }, 
-        _ => None
+        _ => {
+            let mut content = String::new();
+            let mut file = std::fs::File::open(path).unwrap();
+            file.read_to_string(&mut content).unwrap_or_default();
+            Some(content)
+        },
     };
 
     ParsedFile {

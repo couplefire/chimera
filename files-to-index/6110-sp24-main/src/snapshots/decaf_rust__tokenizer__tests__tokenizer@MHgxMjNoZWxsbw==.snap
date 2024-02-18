@@ -1,0 +1,17 @@
+---
+source: src/tokenizer.rs
+description: Tokenizing 0x123hello
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      IntLiteralHex: 123hello
+    span:
+      start:
+        index: 0
+        line: 1
+        col: 0
+      end:
+        index: 10
+        line: 1
+        col: 10

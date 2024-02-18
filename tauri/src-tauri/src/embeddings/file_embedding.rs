@@ -27,7 +27,12 @@ pub async fn create_embedding_files(parsed_files: Vec<ParsedFile>) -> Result<Vec
     let client = Client::new(); // looks for OPENAI_API_KEY environment variable
 
     let parsed_file_strings: Vec<String> = parsed_files.iter().flat_map(|x| {
-        vec![x.name.clone(), clip_string(&x.content.clone().unwrap(), 2000)]
+        let content = clip_string(&x.content.clone().unwrap(), 2000);
+        if content.len() == 0 {
+            vec![x.name.clone(), "_".to_string()]
+        } else {
+            vec![x.name.clone(), content]
+        }
     }).collect();
 
     let result = client.embeddings().create(CreateEmbeddingRequest {

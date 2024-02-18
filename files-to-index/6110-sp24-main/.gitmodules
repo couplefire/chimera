@@ -1,0 +1,3 @@
+[submodule "tests/public-tests"]
+	path = public-tests
+	url = https://github.com/6110-sp24/public-tests.git

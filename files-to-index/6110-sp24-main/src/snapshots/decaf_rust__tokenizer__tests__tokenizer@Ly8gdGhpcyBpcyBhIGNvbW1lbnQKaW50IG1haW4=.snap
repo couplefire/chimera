@@ -1,0 +1,28 @@
+---
+source: src/tokenizer.rs
+description: "Tokenizing // this is a comment\nint main"
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      Keyword: int
+    span:
+      start:
+        index: 21
+        line: 2
+        col: 0
+      end:
+        index: 24
+        line: 2
+        col: 3
+  - token:
+      Identifier: main
+    span:
+      start:
+        index: 25
+        line: 2
+        col: 4
+      end:
+        index: 29
+        line: 2
+        col: 8

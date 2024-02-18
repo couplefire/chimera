@@ -1,0 +1,248 @@
+---
+source: src/tokenizer.rs
+description: "Tokenizing != -- ++ - ! = > >= < <= * / % + - ; [ ] { } ( )"
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      Punctuation: "!="
+    span:
+      start:
+        index: 0
+        line: 1
+        col: 0
+      end:
+        index: 2
+        line: 1
+        col: 2
+  - token:
+      Punctuation: "--"
+    span:
+      start:
+        index: 3
+        line: 1
+        col: 3
+      end:
+        index: 5
+        line: 1
+        col: 5
+  - token:
+      Punctuation: ++
+    span:
+      start:
+        index: 6
+        line: 1
+        col: 6
+      end:
+        index: 8
+        line: 1
+        col: 8
+  - token:
+      Punctuation: "-"
+    span:
+      start:
+        index: 9
+        line: 1
+        col: 9
+      end:
+        index: 10
+        line: 1
+        col: 10
+  - token:
+      Punctuation: "!"
+    span:
+      start:
+        index: 11
+        line: 1
+        col: 11
+      end:
+        index: 12
+        line: 1
+        col: 12
+  - token:
+      Punctuation: "="
+    span:
+      start:
+        index: 13
+        line: 1
+        col: 13
+      end:
+        index: 14
+        line: 1
+        col: 14
+  - token:
+      Punctuation: ">"
+    span:
+      start:
+        index: 15
+        line: 1
+        col: 15
+      end:
+        index: 16
+        line: 1
+        col: 16
+  - token:
+      Punctuation: ">="
+    span:
+      start:
+        index: 17
+        line: 1
+        col: 17
+      end:
+        index: 19
+        line: 1
+        col: 19
+  - token:
+      Punctuation: "<"
+    span:
+      start:
+        index: 20
+        line: 1
+        col: 20
+      end:
+        index: 21
+        line: 1
+        col: 21
+  - token:
+      Punctuation: "<="
+    span:
+      start:
+        index: 22
+        line: 1
+        col: 22
+      end:
+        index: 24
+        line: 1
+        col: 24
+  - token:
+      Punctuation: "*"
+    span:
+      start:
+        index: 25
+        line: 1
+        col: 25
+      end:
+        index: 26
+        line: 1
+        col: 26
+  - token:
+      Punctuation: /
+    span:
+      start:
+        index: 27
+        line: 1
+        col: 27
+      end:
+        index: 28
+        line: 1
+        col: 28
+  - token:
+      Punctuation: "%"
+    span:
+      start:
+        index: 29
+        line: 1
+        col: 29
+      end:
+        index: 30
+        line: 1
+        col: 30
+  - token:
+      Punctuation: +
+    span:
+      start:
+        index: 31
+        line: 1
+        col: 31
+      end:
+        index: 32
+        line: 1
+        col: 32
+  - token:
+      Punctuation: "-"
+    span:
+      start:
+        index: 33
+        line: 1
+        col: 33
+      end:
+        index: 34
+        line: 1
+        col: 34
+  - token:
+      Punctuation: ;
+    span:
+      start:
+        index: 35
+        line: 1
+        col: 35
+      end:
+        index: 36
+        line: 1
+        col: 36
+  - token:
+      Punctuation: "["
+    span:
+      start:
+        index: 37
+        line: 1
+        col: 37
+      end:
+        index: 38
+        line: 1
+        col: 38
+  - token:
+      Punctuation: "]"
+    span:
+      start:
+        index: 39
+        line: 1
+        col: 39
+      end:
+        index: 40
+        line: 1
+        col: 40
+  - token:
+      Punctuation: "{"
+    span:
+      start:
+        index: 41
+        line: 1
+        col: 41
+      end:
+        index: 42
+        line: 1
+        col: 42
+  - token:
+      Punctuation: "}"
+    span:
+      start:
+        index: 43
+        line: 1
+        col: 43
+      end:
+        index: 44
+        line: 1
+        col: 44
+  - token:
+      Punctuation: (
+    span:
+      start:
+        index: 45
+        line: 1
+        col: 45
+      end:
+        index: 46
+        line: 1
+        col: 46
+  - token:
+      Punctuation: )
+    span:
+      start:
+        index: 47
+        line: 1
+        col: 47
+      end:
+        index: 48
+        line: 1
+        col: 48

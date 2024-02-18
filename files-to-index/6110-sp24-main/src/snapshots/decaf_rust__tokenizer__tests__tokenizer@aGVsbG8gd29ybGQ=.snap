@@ -1,0 +1,28 @@
+---
+source: src/tokenizer.rs
+description: Tokenizing hello world
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      Identifier: hello
+    span:
+      start:
+        index: 0
+        line: 1
+        col: 0
+      end:
+        index: 5
+        line: 1
+        col: 5
+  - token:
+      Identifier: world
+    span:
+      start:
+        index: 6
+        line: 1
+        col: 6
+      end:
+        index: 11
+        line: 1
+        col: 11

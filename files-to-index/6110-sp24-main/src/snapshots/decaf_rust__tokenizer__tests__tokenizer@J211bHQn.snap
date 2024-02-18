@@ -1,0 +1,12 @@
+---
+source: src/tokenizer.rs
+description: "Tokenizing 'mult'"
+expression: tokenize(input.to_string())
+---
+Err:
+  message: "unterminated character literal; expected '"
+  pos:
+    index: 2
+    line: 1
+    col: 2
+  code_error_line: "'mult'"

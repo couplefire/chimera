@@ -1,0 +1,17 @@
+---
+source: src/tokenizer.rs
+description: "Tokenizing 'a'"
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      CharLiteral: a
+    span:
+      start:
+        index: 0
+        line: 1
+        col: 0
+      end:
+        index: 3
+        line: 1
+        col: 3

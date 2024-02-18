@@ -1,0 +1,17 @@
+---
+source: src/tokenizer.rs
+description: "Tokenizing '\\n'"
+expression: tokenize(input.to_string())
+---
+Ok:
+  - token:
+      CharLiteral: "\n"
+    span:
+      start:
+        index: 0
+        line: 1
+        col: 0
+      end:
+        index: 4
+        line: 1
+        col: 4
