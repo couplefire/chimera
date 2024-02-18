@@ -33,6 +33,12 @@ async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Res
     Ok(result)
 }
 
+#[tauri::command]
+async fn open(path: &str, _state: tauri::State<'_, DbConnection>) -> Result<(), ()> {
+    open::that(path).unwrap();
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| { 
@@ -80,7 +86,7 @@ fn main() {
 
             Ok(()) 
         }) 
-        .invoke_handler(tauri::generate_handler![search])
+        .invoke_handler(tauri::generate_handler![search, open])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

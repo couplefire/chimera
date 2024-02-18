@@ -24,6 +24,7 @@ arrow-schema = "50.0.0"
 arrow-array = "50.0.0"
 lopdf = "0.32.0"
 async-openai = "0.18.3"
+open = "5.0.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
