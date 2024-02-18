@@ -1,9 +1,9 @@
 
 .searchBox{
-    padding: 8px 12px;
-    font-size: 16px;
+    padding: 10px 15px; /* Increased padding for a larger appearance */
+    font-size: 18px; /* Increased font size for better readability */
     border: 2px solid #5C5C5C;
-    border-radius: 8px;
+    border-radius: 10px; /* Slightly larger border-radius for a softer look */
     background-color: #2f2f2f;
     color: #f6f6f6;
     outline: none;

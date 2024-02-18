@@ -3,11 +3,12 @@ import { getLogoByExtension } from "../utils/logoutils";
 import styles from "../styles/resultbox.module.css";
 
 interface ResultBoxProps {
-  result: SearchResult;
+    isActive: boolean;
+    result: SearchResult;
 }
 
 
-function SearchBox({ result }: ResultBoxProps ) {
+function SearchBox({ isActive, result }: ResultBoxProps ) {
     const file_extension = result.directory.split('.').pop(); 
     const logo_path = getLogoByExtension(file_extension);
 
@@ -39,18 +40,20 @@ function SearchBox({ result }: ResultBoxProps ) {
     }
 
     return (
-        <div className={styles.container}>
-            <img src={logo_path} className={styles.logo} />
-            <div className={styles.textContainer}>
-                <div className={styles.topLevel}>
-                    <div>{result.fileName}</div>
-                </div>
-                <div className={styles.bottomLevel}>
-                    <div>{renderDirectory(result.directory)}</div>
-                    {result.numPages && 
-                        <div>{result.numPages} pages</div>
-                    }
-                    <div>{renderFileSize(result.fileSize)}</div>
+        <div className={`${styles.resultBox} ${isActive ? styles.active : ''}`}>
+            <div className={styles.container}>
+                <img src={logo_path} className={styles.logo} />
+                <div className={styles.textContainer}>
+                    <div className={styles.topLevel}>
+                        <div>{result.fileName}</div>
+                    </div>
+                    <div className={styles.bottomLevel}>
+                        <div>{renderDirectory(result.directory)}</div>
+                        {result.numPages && 
+                            <div>{result.numPages} pages</div>
+                        }
+                        <div>{renderFileSize(result.fileSize)}</div>
+                    </div>
                 </div>
             </div>
         </div>

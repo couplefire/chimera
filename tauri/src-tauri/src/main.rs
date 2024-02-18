@@ -27,7 +27,11 @@ struct SearchResult {
 
 #[tauri::command]
 async fn search(search_text: &str, state: tauri::State<'_, DbConnection>) -> Result<Vec<SearchResult>, ()> {
-    let prompt_embed = embeddings::create_embedding_prompt(search_text).await.unwrap();
+    if search_text.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let prompt_embed = embeddings::create_embedding_prompt(search_text).unwrap();
     let result = similarity_search::search(state.inner().clone(), prompt_embed).await.unwrap();
 
     Ok(result)
