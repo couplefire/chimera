@@ -5,9 +5,11 @@ use anyhow::Result;
 
 use crate::parser::ParsedFile;
 use crate::EMBEDDING_DIM; 
+use std::env;
 
 pub fn create_embedding_file(parsed_file: ParsedFile) -> Result<Vec<f32>> {
-    let client = Client::new("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".to_string()); 
+    let openai_key: String = env::var("OPENAI_API_KEY").unwrap().to_string();
+    let client = Client::new(openai_key); 
 
     let mut combined_str = parsed_file.name;
     combined_str.push_str("\n");

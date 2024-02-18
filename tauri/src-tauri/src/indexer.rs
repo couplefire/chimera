@@ -1,5 +1,5 @@
 use arrow_array::types::Float32Type;
-use arrow_array::{FixedSizeListArray, RecordBatch, RecordBatchIterator, StringArray, UInt64Array};
+use arrow_array::{FixedSizeListArray, RecordBatch, RecordBatchIterator, StringArray, Int32Array, UInt64Array};
 use walkdir::WalkDir;
 use std::fs;
 use std::io::Read;
@@ -48,8 +48,8 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
                                 EMBEDDING_DIM,
                             ),
                         ),
-                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.file_size])),
-                        Arc::new(UInt64Array::from_iter_values(vec![parsed_file.num_pages.unwrap()]))
+                        Arc::new(Int32Array::from_iter_values(vec![parsed_file.file_size as i32])),
+                        Arc::new(Int32Array::from_iter_values(vec![parsed_file.num_pages.unwrap_or_default() as i32]))
                     ],
                 )
                 .unwrap()].into_iter().map(Ok),

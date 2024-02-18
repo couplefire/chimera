@@ -38,6 +38,7 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
 
     if initialize_db {
         let _ = our_db.drop_table("files").await;
+        let _ = our_db.create_table("files", Box::new(batches), None).await.expect("Failed to create table");
         let db_connect = DbConnection{
             db: our_db.clone(),
             schema: our_schema.clone(),
@@ -47,7 +48,7 @@ pub async fn init_db(initialize_db: bool) -> DbConnection {
     };
 
     DbConnection {
-        db: our_db.clone(),
-        schema: our_schema.clone(),
+        db: our_db,
+        schema: our_schema,
     }
 }
