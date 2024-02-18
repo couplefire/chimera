@@ -23,6 +23,10 @@ pub async fn start_indexing(db: DbConnection) -> Result<()> {
         let path = entry.path();
         if path.is_file() {
             let parsed_file = parse(path.to_str().unwrap());
+                if parsed_file.is_none() {
+                continue;
+            }
+            let parsed_file = parsed_file.unwrap();
             parsed_files.push(parsed_file);
             println!("Discovered file {:?}", path);
         }

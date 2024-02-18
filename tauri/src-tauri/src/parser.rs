@@ -1,6 +1,8 @@
 use std::io::Read;
 use std::fmt;
 
+use crate::db;
+
 #[derive(Clone)]
 pub struct ParsedFile {
     pub name: String, 
@@ -45,7 +47,7 @@ fn get_pdf_num_pages(path: &str) -> u64 {
     document.get_pages().len() as u64
 }
 
-pub fn parse(path: &str) -> ParsedFile {
+pub fn parse(path: &str) -> Option<ParsedFile> {
     let path_obj = std::path::Path::new(path);
     let name = path_obj
         .file_name()
@@ -59,6 +61,7 @@ pub fn parse(path: &str) -> ParsedFile {
         .to_str()
         .unwrap()
         .to_string();
+   
 
     let content: Option<String> = match extension.as_str() {
         "pdf" => {
@@ -78,14 +81,14 @@ pub fn parse(path: &str) -> ParsedFile {
         },
     };
 
-    ParsedFile {
+    Some(ParsedFile {
         name,
         extension: extension.clone(),
         path: path.to_string(),
         content,
         file_size: std::fs::metadata(path).unwrap().len(),
         num_pages: if extension == "pdf" { Some(get_pdf_num_pages(path)) } else { None }
-    }
+    })
 }
 
 #[cfg(test)]
